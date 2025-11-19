@@ -1,6 +1,8 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from typing import List, Dict, Any
+from datetime import datetime
+import os
 
 class KnowledgeBase:
     def __init__(self):
@@ -8,6 +10,9 @@ class KnowledgeBase:
 
     def add_triplet(self, subject: str, predicate: str, object_: str):
         self.graph.add_edge(subject, object_, relation=predicate)
+
+    def reset(self):
+        self.graph.clear()
 
     def get_state(self) -> Dict[str, Any]:
         return {
@@ -47,33 +52,38 @@ def get_graph_state() -> Dict[str, Any]:
 
 def save_graph_image() -> str:
     """
-    Generates and saves a visual representation of the current Knowledge Graph to 'knowledge_graph.png'.
-    
-    Returns:
-        A message indicating success or failure.
+    Generates a visualization of the current knowledge graph and saves it as a PNG file.
+    The file is saved in the 'examples/' directory with a unique timestamp.
+    Returns the path to the saved image.
     """
-    try:
-        G = kb.graph
-        if G.number_of_nodes() == 0:
-            return "Graph is empty. Nothing to visualize."
-            
-        plt.figure(figsize=(12, 8))
-        pos = nx.spring_layout(G, k=0.5, iterations=50)
+    G = kb.graph
+    
+    if G.number_of_nodes() == 0:
+        return "Graph is empty. Nothing to visualize."
         
-        # Draw nodes
-        nx.draw_networkx_nodes(G, pos, node_size=2000, node_color="lightblue", alpha=0.9)
-        nx.draw_networkx_labels(G, pos, font_size=10, font_weight="bold")
-        
-        # Draw edges
-        nx.draw_networkx_edges(G, pos, edge_color="gray", arrows=True, arrowsize=20)
-        edge_labels = nx.get_edge_attributes(G, "relation")
-        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8)
-        
-        plt.title("Knowledge Graph Visualization")
-        plt.axis("off")
-        plt.tight_layout()
-        plt.savefig("knowledge_graph.png")
-        plt.close()
-        return "Successfully saved graph visualization to 'knowledge_graph.png'."
-    except Exception as e:
-        return f"Error saving visualization: {str(e)}"
+    plt.figure(figsize=(12, 8))
+    pos = nx.spring_layout(G, k=0.5) # Removed iterations=50 as it's not in the new snippet
+    
+    # Draw nodes
+    nx.draw_networkx_nodes(G, pos, node_size=2000, node_color="lightblue", alpha=0.9)
+    nx.draw_networkx_labels(G, pos, font_size=10, font_weight="bold")
+    
+    # Draw edges
+    nx.draw_networkx_edges(G, pos, edge_color="gray", arrows=True, arrowsize=20)
+    edge_labels = nx.get_edge_attributes(G, "relation")
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8)
+    
+    # Ensure examples directory exists
+    os.makedirs("examples", exist_ok=True)
+    
+    # Generate unique filename
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"examples/graph_{timestamp}.png"
+    
+    plt.title("Knowledge Graph Visualization")
+    plt.axis("off") # Keep axis off for cleaner visualization
+    plt.tight_layout() # Keep tight layout
+    plt.savefig(filename)
+    plt.close()
+    
+    return filename
