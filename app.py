@@ -78,7 +78,7 @@ with st.sidebar:
     st.subheader("Visualization Settings")
     show_physics = st.toggle("Enable Physics", value=True)
     show_labels = st.toggle("Show Node Labels", value=True)
-    layout_type = st.selectbox("Layout Algorithm", ["Barnes Hut", "Force Atlas 2 Based", "Repulsion"])
+    layout_type = st.selectbox("Layout Algorithm", ["Barnes Hut", "Force Atlas 2 Based", "Repulsion", "Hierarchical (Mind Map)"])
     
     st.markdown("---")
     st.subheader("Filters")
@@ -169,24 +169,68 @@ if st.session_state.graph_data:
     
     net = Network(height="700px", width="100%", bgcolor="#1e1e24", font_color="white")
     
-    # Add nodes
+    # Add nodes with improved styling
     for node in nodes:
-        # node is a string ID
-        net.add_node(node, label=node if show_labels else " ", title=node, color="#8b5cf6")
+        net.add_node(
+            node, 
+            label=node if show_labels else " ", 
+            title=node, 
+            color="#8b5cf6",
+            size=25,
+            font={'size': 20, 'color': 'white'}
+        )
         
-    # Add edges
+    # Add edges with improved styling
     for edge in display_edges:
-        net.add_edge(edge["source"], edge["target"], title=edge["relation"], label=edge["relation"], color="#475569")
+        net.add_edge(
+            edge["source"], 
+            edge["target"], 
+            title=edge["relation"], 
+            label=edge["relation"], 
+            color="#475569",
+            width=2,
+            font={'size': 14, 'align': 'middle'}
+        )
         
     # Physics options
     if layout_type == "Barnes Hut":
-        net.barnes_hut()
+        net.barnes_hut(gravity=-8000, central_gravity=0.3, spring_length=250, spring_strength=0.001, damping=0.09, overlap=0)
+        net.toggle_physics(show_physics)
     elif layout_type == "Force Atlas 2 Based":
-        net.force_atlas_2based()
+        net.force_atlas_2based(gravity=-50, central_gravity=0.01, spring_length=100, spring_strength=0.08, damping=0.4, overlap=0)
+        net.toggle_physics(show_physics)
     elif layout_type == "Repulsion":
-        net.repulsion()
-        
-    net.toggle_physics(show_physics)
+        net.repulsion(node_distance=200, central_gravity=0.2, spring_length=200, spring_strength=0.05, damping=0.09)
+        net.toggle_physics(show_physics)
+    elif layout_type == "Hierarchical (Mind Map)":
+        options = {
+            "layout": {
+                "hierarchical": {
+                    "enabled": True,
+                    "levelSeparation": 150,
+                    "nodeSpacing": 200,
+                    "treeSpacing": 200,
+                    "blockShifting": True,
+                    "edgeMinimization": True,
+                    "parentCentralization": True,
+                    "direction": "UD",
+                    "sortMethod": "hubsize"
+                }
+            },
+            "physics": {
+                "enabled": show_physics,
+                "hierarchicalRepulsion": {
+                    "nodeDistance": 150,
+                    "centralGravity": 0.0,
+                    "springLength": 100,
+                    "springConstant": 0.01,
+                    "damping": 0.09
+                }
+            }
+        }
+        net.set_options(f"""
+        var options = {json.dumps(options)}
+        """)
     
     # Save and display
     try:
