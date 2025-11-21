@@ -1,8 +1,5 @@
 # Dynamic Knowledge Graph Architect
 
-**Track**: Freestyle
-**Team**: [Your Team Name]
-
 ## 1. The Pitch
 
 ### Problem
@@ -19,9 +16,25 @@ By combining **Sequential Agents**, **Structured Ontology Extraction**, and **Co
 ### Value
 This tool bridges the gap between unstructured text and structured data visualization. It allows researchers, students, and analysts to instantly visualize complex relationships without manually drawing diagrams or writing code.
 
+## 2. Demo
+
+### Interactive UI
+![Main Interface](assets/frontend.png)
+
+### Visualization Styles
+The agent supports multiple layout algorithms to best represent different types of data:
+
+| Barnes Hut (Default) | Force Atlas 2 |
+| :---: | :---: |
+| ![Barnes Hut](assets/barnes_hut_viz.png) | ![Force Atlas](assets/force_atlas_viz.png) |
+
+| Repulsion | Hierarchical (Mind Map) |
+| :---: | :---: |
+| ![Repulsion](assets/repulsion_viz.png) | ![Hierarchical](assets/heirarchical_viz.png) |
+
 ---
 
-## 2. The Implementation
+## 3. The Implementation
 
 ### Architecture
 The system uses a **Sequential Multi-Agent Architecture** powered by the Google Agent Development Kit (ADK).
@@ -38,22 +51,25 @@ The system uses a **Sequential Multi-Agent Architecture** powered by the Google 
     -   **Role**: Converts the graph state into a visual asset.
     -   **Capability**: **Code Execution**. It writes Python code using `networkx` and `matplotlib` to render the graph to a PNG file.
 
-### Key Concepts Applied (3+)
+### Key Concepts Applied 
 1.  **Multi-Agent System**: A sequential pipeline where each agent passes context to the next.
 2.  **Tools & Code Execution**: Custom tools for graph management and the built-in `BuiltInCodeExecutor` for visualization.
 3.  **Observability**: A custom `GraphBuilderPlugin` that tracks metrics (triplets added, graphs generated) and logs agent activities.
 
 ### File Structure
+-   `app.py`: Streamlit frontend application.
 -   `knowledge_graph_agent/`
-    -   `main.py`: Entry point and runner setup.
+    -   `main.py`: Backend logic and agent runner.
+    -   `server.py`: FastAPI server for the backend.
     -   `architect.py`: Defines the `SequentialAgent` pipeline.
     -   `agents.py`: Configures the individual agents and their prompts.
     -   `graph_tools.py`: Implements the in-memory graph database and tools.
     -   `observability.py`: Custom plugin for metrics and logging.
+-   `assets/`: Images for documentation.
 
 ---
 
-## 3. How to Run
+## 4. How to Run
 
 ### Prerequisites
 -   Python 3.10+
@@ -63,17 +79,21 @@ The system uses a **Sequential Multi-Agent Architecture** powered by the Google 
 ### Setup
 ```bash
 # 1. Clone the repository
-git clone <your-repo-url>
-cd kaggle-5-days-ai
+git clone https://github.com/Ramsi-K/dynamic-knowledge-graph-agents
+cd dynamic-knowledge-graph-agents
 
 # 2. Create a virtual environment and install dependencies
 uv venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-uv pip install google-adk networkx matplotlib
+uv pip install google-adk networkx matplotlib streamlit pyvis fastapi uvicorn requests
 
-# 3. Run the Agent
-python knowledge_graph_agent/main.py
+# 3. Run the Application
+# Start the backend server
+uv run python -m knowledge_graph_agent.server
+
+# Start the Streamlit UI (in a new terminal)
+uv run streamlit run app.py
 ```
 
 ### Output
-The agent will print its thought process to the console and save a `knowledge_graph.png` file in the current directory.
+Open your browser to `http://localhost:8501` to interact with the agent.

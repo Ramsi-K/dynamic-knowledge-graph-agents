@@ -1,46 +1,59 @@
-# Kaggle Submission Writeup
-
-**Title**: Dynamic Knowledge Graph Architect
-**Subtitle**: Transforming Unstructured Thought into Structured Visual Maps
+# Dynamic Knowledge Graph Architect  
+## Transforming Unstructured Thought into Structured Visual Maps  
 **Track**: Freestyle Track
 
-## Project Description
+![Project Thumbnail](../assets/thumbnail.png)
 
 ### Problem Statement
 In the era of Large Language Models, we have access to infinite information, but "understanding" often requires structure. Reading a 5-page summary of a complex ecosystem, a novel's plot, or a corporate hierarchy is inefficient. Humans understand complex systems best through **visual maps**, not linear text. Existing tools either require manual diagramming or are limited to pre-defined schemas.
 
-### The Solution
-The **Dynamic Knowledge Graph Architect** is an intelligent agent pipeline that automatically transforms natural language queries into structured, visual Knowledge Graphs. It doesn't just summarize; it **architects** a map of the information.
+The problem is that while LLMs are great at generating text, they lack the native ability to "see" and "draw" the connections they understand. We need a bridge between the unstructured reasoning of an LLM and the structured, visual nature of a graph.
 
-By simply asking "Explain the political structure of Dune," the agent:
-1.  **Researches** the topic to identify key entities and relationships.
-2.  **Structures** the data into a formal graph ontology (Nodes & Edges).
-3.  **Visualizes** the result by writing and executing Python code to generate a high-quality image file.
+### Why agents?
+Agents are the perfect solution for this problem because it requires a **multi-step cognitive pipeline** that no single prompt can achieve reliably:
+1.  **Research**: An agent needs to act as a librarian, gathering broad context without getting bogged down in details.
+2.  **Ontology Extraction**: A separate cognitive step is needed to enforce structure (Subject -> Predicate -> Object) on that research.
+3.  **Code Execution**: Finally, an agent needs to act as a developer to write the visualization code.
 
-### Architecture
-The solution leverages the **Google Agent Development Kit (ADK)** to orchestrate a **Sequential Multi-Agent System**:
+A single LLM call often hallucinates graph structures or fails to generate valid visualization code. By breaking this into specialized agents—a Researcher, a Structurer, and a Visualizer—we achieve higher accuracy, better error handling, and a system that can "think" before it "draws."
 
-1.  **ResearchAgent (The Librarian)**: Uses Gemini 2.5 Flash Lite to synthesize a comprehensive summary of the user's topic, ensuring all key entities are identified.
-2.  **OntologyAgent (The Structurer)**: A specialized agent that analyzes the research and extracts structured triplets (Subject -> Predicate -> Object) using custom tools (`add_triplet`). It builds the graph state in memory.
-3.  **VisualizationAgent (The Artist)**: Demonstrates the power of **Code Execution**. It reads the graph state and writes a complete Python script (using `networkx` and `matplotlib`) to render the graph visually. This allows for infinite customization and perfect rendering of complex structures.
+### What you created
+I created the **Dynamic Knowledge Graph Architect**, a sequential multi-agent system powered by the **Google Agent Development Kit (ADK)**.
 
-### Key Features (ADK Concepts)
-*   **Multi-Agent System**: A sequential pipeline where agents pass context and refine data at each step.
-*   **Tools & Code Execution**: Custom tools for graph state management and the built-in `BuiltInCodeExecutor` for generating the final visual asset.
-*   **Observability**: A custom `GraphBuilderPlugin` tracks the "Knowledge Velocity" (triplets added per session) and logs agent activities for debugging.
+**Architecture:**
+The system is a pipeline of three specialized agents:
+1.  **ResearchAgent**: Uses Gemini 2.5 Flash Lite to synthesize a comprehensive summary of the user's topic.
+2.  **OntologyAgent**: Analyzes the summary and extracts structured triplets using a custom `add_triplet` tool, building a graph state in memory.
+3.  **VisualizationAgent**: Reads the graph state and writes Python code (using `networkx` and `matplotlib`) to generate static assets, while the frontend uses `PyVis` for interactive exploration.
 
-### Value
-This project demonstrates that Agents can be creators, not just talkers. By bridging the gap between unstructured text and structured visualization, the Knowledge Graph Architect empowers users to instantly grasp complex systems, making it a powerful tool for education, research, and systems analysis.
+The backend is a **FastAPI** server that orchestrates these agents, and the frontend is a **Streamlit** application that provides a polished, interactive user interface.
 
----
+### Demo
+The solution is a fully interactive web application. Users simply enter a topic (e.g., "The History of the Internet"), and the agents build a graph in real-time.
 
-## Video Script Outline (For your 3-min video)
+**Interactive UI:**
+![Main Interface](../assets/frontend.png)
 
-1.  **Intro (0:00-0:30)**: "Hi, I'm [Name]. LLMs are great at writing, but bad at mapping. Today I'm presenting the Knowledge Graph Architect."
-2.  **The Problem (0:30-1:00)**: Show a wall of text. "This is hard to understand."
-3.  **The Solution (1:00-2:00)**: Show the Agent running.
-    *   "First, the Research Agent finds the facts."
-    *   "Then, the Ontology Agent builds the structure."
-    *   "Finally, the Viz Agent writes Python code to draw this..." -> **Reveal the generated Image**.
-4.  **Architecture (2:00-2:30)**: Show a diagram of the 3 agents and the ADK pipeline.
-5.  **Conclusion (2:30-3:00)**: "Built with Google ADK. Thanks for watching."
+**Visualization Styles:**
+The app supports multiple layouts, including a "Mind Map" mode that forces a hierarchical structure:
+![Hierarchical Layout](../assets/heirarchical_viz.png)
+
+### The Build
+I built this project using the **Google Agent Development Kit (ADK)** as the core framework.
+
+**Tools & Technologies:**
+*   **Google ADK**: For defining agents, tools, and the sequential pipeline.
+*   **Gemini 2.5 Flash Lite**: The intelligence behind the agents.
+*   **Streamlit**: For the interactive, dark-mode UI.
+*   **PyVis & NetworkX**: For graph processing and visualization.
+*   **FastAPI**: To serve the agent pipeline as an API.
+
+**Key Implementation Details:**
+*   **Custom Tools**: I built a `KnowledgeBase` class with `add_triplet` and `get_graph_state` tools to give the agents "memory" of the graph they are building.
+*   **Observability**: I implemented a `GraphBuilderPlugin` to track metrics like "Knowledge Velocity" (triplets added per second).
+*   **Micro-Commits**: I used a rigorous git workflow with micro-commits to track every feature and fix.
+
+### If I had more time, this is what I'd do
+1.  **Recursive Expansion**: Allow users to click a node in the graph to trigger a new agent run that expands *just that node*, effectively letting you "zoom in" infinitely into the knowledge graph.
+2.  **Source Citations**: Modify the ResearchAgent to store URLs for every fact, so clicking a node opens the original source material.
+3.  **3D Visualization**: Upgrade the frontend to use a 3D graph library for an even more immersive experience.
